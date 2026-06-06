@@ -23,3 +23,64 @@ def passing_students(records: list[dict], threshold: float = 60.0) -> list[str]:
     """Return names whose average >= threshold, sorted alphabetically."""
     # TODO: implement
     pass
+
+def average_per_student(records: list[dict]) -> dict[str, float]:
+    student_scores = {}
+    for record in records:
+        student_name = record["name"]
+        score = record["score"]
+        if student_name not in student_scores:
+            student_scores[student_name] = []
+        student_scores[student_name].append(score)
+    average_scores = {}
+    for student_name, scores in student_scores.items():
+        average = sum(scores) / len(scores)
+        average_scores[student_name] = round(average, 2)
+    return average_scores
+
+def subjects_offered(records: list[dict]) -> set[str]:
+    unique_subjects = set()
+    for record in records:
+        if "subject" in record:
+            unique_subjects.add(record["subject"])
+    return unique_subjects
+
+def top_scorer(records: list[dict]) -> tuple[str, float]:
+    average_scores = average_per_student(records)
+    if not average_scores:
+        return "", 0.0
+    top_name = ""
+    top_score = -1.0
+    for name, score in average_scores.items():
+        if score > top_score:
+            top_score = score
+            top_name = name
+    return top_name, top_score
+
+def passing_students(records: list[dict], threshold: float = 60.0) -> list[str]:
+    average_scores = average_per_student(records)
+    passing = []
+    for name, avg in average_scores.items():
+        if avg >= threshold:
+            passing.append(name)
+    passing.sort()
+    return passing
+
+def format_report(records: list[dict]) -> str:
+    report_lines = []
+    report_lines.append(f"Total records: {len(records)}")
+    subjects = sorted(list(subjects_offered(records)))
+    report_lines.append(f"Subjects offered: {', '.join(subjects)}")
+    report_lines.append("Average scores per student:")
+    avg_scores = average_per_student(records)
+    for student_name in sorted(avg_scores.keys()):
+        report_lines.append(f"  {student_name}: {avg_scores[student_name]:.2f}")
+    top_student_name, top_student_score = top_scorer(records)
+    report_lines.append(f"Top scorer: {top_student_name} ({top_student_score:.2f})")
+    passing = passing_students(records)
+    report_lines.append(f"Passing students (threshold 60.0): {', '.join(passing) if passing else 'None'}")
+    return "\n".join(report_lines)
+
+print(format_report(RECORDS))
+
+print(format_report(RECORDS))
